@@ -1,4 +1,4 @@
-from flask import request, Response, current_app
+from flask import request
 import json
 from google.oauth2 import service_account
 from httplib2 import Http
@@ -18,15 +18,6 @@ from fake_useragent import UserAgent
 app = Flask(__name__, template_folder='template')
 
 
-def some_long_calculation(number):
-    print(number)
-    import time
-    if number < 100:
-        time.sleep(5)
-    else:
-        pass
-
-
 @app.route("/")
 def hello():
     return render_template('/index.html')
@@ -34,13 +25,9 @@ def hello():
 
 @app.route("/process")
 def process():
-    def generate():
-        t = Test()
-        t.search_google()
-        yield str(100)
-        for i in range(99):
-            yield str(some_long_calculation(i))
-    return Response(generate(), mimetype='application/json')
+    t = Test()
+    t.search_google()
+    return jsonify(success=True)
 
 
 class Test:
@@ -133,7 +120,6 @@ class Test:
                                                                  range=range, valueInputOption='RAW', insertDataOption='OVERWRITE', body=Body)
             response = request.execute()
             print(response)
-            some_long_calculation(100)
 
 
 if __name__ == "__main__":
