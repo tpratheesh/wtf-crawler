@@ -1,4 +1,4 @@
-from flask import request
+from flask import request, redirect, url_for
 import json
 from google.oauth2 import service_account
 from httplib2 import Http
@@ -23,11 +23,16 @@ def hello():
     return render_template('/index.html')
 
 
+@app.route("/success")
+def success():
+    return render_template('/index.html')
+
+
 @app.route("/process")
 def process():
     t = Test()
     t.search_google()
-    return jsonify(success=True)
+    return redirect(url_for('success'))
 
 
 class Test:
