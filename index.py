@@ -25,12 +25,8 @@ def hello():
 
 @app.route("/process")
 def process():
-    try:
-        t = Test()
-        t.search_google()
-    except:
-        print("Unexpected error:", sys.exc_info())
-        return jsonify(success=False)
+    t = Test()
+    t.search_google()
     return jsonify(success=True)
 
 
