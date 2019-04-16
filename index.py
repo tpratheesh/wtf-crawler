@@ -67,61 +67,53 @@ class Test:
                     payload = {
                         'api_key': '4597a316740a95bfcb52eade5ac54a9b', 'url': req_url, 'keep_headers': 'true'}
                     header = {'User-Agent': str(self.ua.ff)}
+                    success = False
+                    while success == False:
+                        try:
+                            result_page = requests.get(
+                                'http://api.scraperapi.com', params=payload, headers=header)
+                            soup = BeautifulSoup(result_page.text, 'lxml')
+                            results_tag = soup.find(
+                                'div', attrs={"id": "search"})
 
-                    result_page = requests.get(
-                        'http://api.scraperapi.com', params=payload, headers=header)
+                            if results_tag:
+                                row_arr = []
 
-                    try:
-                        soup = BeautifulSoup(result_page.text, 'lxml')
-                        results_tag = soup.find(
-                            'div', attrs={"id": "search"})
-
-                        if results_tag:
-                            row_arr = []
-
-                            g_tags = results_tag.find_all(
-                                'div', attrs={"class": "g"})
-                            if g_tags:
-                                g_tag = g_tags[0]
-                                r_tag = g_tag.find('div', attrs={"class": "r"})
-                                if r_tag is None:
+                                g_tags = results_tag.find_all(
+                                    'div', attrs={"class": "g"})
+                                if g_tags:
+                                    g_tag = g_tags[0]
                                     r_tag = g_tag.find(
-                                        'h3', attrs={"class": "r"})
-                                s_tag = g_tag.find('div', attrs={"class": "s"})
+                                        'div', attrs={"class": "r"})
+                                    if r_tag is None:
+                                        r_tag = g_tag.find(
+                                            'h3', attrs={"class": "r"})
+                                    s_tag = g_tag.find(
+                                        'div', attrs={"class": "s"})
 
-                                title = r_tag.find('h3').text
-                                cite = s_tag.find('cite')
-                                if cite:
-                                    url = str(cite.text)
-                                else:
-                                    url = str(r_tag.find('a')['href'])
-                                description = s_tag.find(
-                                    'span', attrs={"class": "st"}).text
+                                    title = r_tag.find('h3').text
+                                    cite = s_tag.find('cite')
+                                    if cite:
+                                        url = str(cite.text)
+                                    else:
+                                        url = str(r_tag.find('a')['href'])
+                                    description = s_tag.find(
+                                        'span', attrs={"class": "st"}).text
 
-                                row_arr.append(title)
-                                row_arr.append(url)
-                                row_arr.append(description)
-                                write_arr.append(row_arr)
+                                    row_arr.append(title)
+                                    row_arr.append(url)
+                                    row_arr.append(description)
+                                    write_arr.append(row_arr)
 
-                                print('Title: ' + title)
-                                print('URL: ' + url)
-                                print('Description: ' + description)
-                        else:
-                            # print('result tag not found')
-                            row_arr = []
-                            row_arr.append('')
-                            row_arr.append('')
-                            row_arr.append('')
-                            write_arr.append(row_arr)
-                    except:
-                        # print('Error : Ignoring this line')
-                        row_arr = []
-                        row_arr.append('')
-                        row_arr.append('')
-                        row_arr.append('')
-                        write_arr.append(row_arr)
-                        print("Unexpected error:", sys.exc_info())
-                        pass
+                                    print('Title: ' + title)
+                                    print('URL: ' + url)
+                                    print('Description: ' + description)
+                                    success = True
+                            else:
+                                print('result tag not found')
+                        except:
+                            print("Unexpected error:", sys.exc_info())
+                            pass
             print(
                 '-----------------------------------BATCH ENDS-----------------------------------')
             Body = {
