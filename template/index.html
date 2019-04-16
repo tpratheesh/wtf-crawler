@@ -365,6 +365,17 @@
         $(document).ready(function () {
             $(".processBtn").on("click", function (event) {
                 event.preventDefault();
+                var interval = setInterval(function () {
+                    $.ajax({
+                        url: "/ping",
+                        timeout: 5000,
+                        success: function () {
+                            clearInterval(interval)
+                            EasyLoading.hide({
+                            })
+                        },
+                    });
+                }, 5000)
                 EasyLoading.show({
                     type: EasyLoading.TYPE['PACMAN'],
                     text: 'Please wait while we update your Google sheet!'
