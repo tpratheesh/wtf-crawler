@@ -74,6 +74,7 @@ class Test:
                         'api_key': '4597a316740a95bfcb52eade5ac54a9b', 'url': req_url, 'keep_headers': 'true'}
                     header = {'User-Agent': str(self.ua.ff)}
                     success = False
+                    count = 0
                     while success == False:
                         try:
                             result_page = requests.get(
@@ -85,38 +86,80 @@ class Test:
                             if results_tag:
                                 row_arr = []
 
-                                g_tags = results_tag.find_all(
-                                    'div', attrs={"class": "g"})
-                                if g_tags:
-                                    g_tag = g_tags[0]
-                                    r_tag = g_tag.find(
-                                        'div', attrs={"class": "r"})
-                                    if r_tag is None:
-                                        r_tag = g_tag.find(
-                                            'h3', attrs={"class": "r"})
-                                    s_tag = g_tag.find(
-                                        'div', attrs={"class": "s"})
+                                web_results = results_tag.find(
+                                    lambda tag: tag.name == 'h2' and tag.text == 'Web results'
+                                )
+                                if web_results:
+                                    sibling = web_results.next_sibling
+                                    if sibling:
+                                        g_tags = sibling.find_all(
+                                            'div', attrs={"class": "g"})
+                                        if g_tags:
+                                            g_tag = g_tags[0]
+                                            r_tag = g_tag.find(
+                                                'div', attrs={"class": "r"}, recursive=True)
+                                            if r_tag is None:
+                                                r_tag = g_tag.find(
+                                                    'h3', attrs={"class": "r"}, recursive=True)
+                                            s_tag = g_tag.find(
+                                                'div', attrs={"class": "s"}, recursive=True)
 
-                                    title = r_tag.find('h3').text
-                                    cite = s_tag.find('cite')
-                                    if cite:
-                                        url = str(cite.text)
+                                            title = r_tag.find(
+                                                'h3', recursive=True).text
+                                            cite = s_tag.find('cite', recursive=True)
+                                            if cite:
+                                                url = str(cite.text)
+                                            else:
+                                                url = str(r_tag.find(
+                                                    'a', recursive=True)['href'])
+                                            description = s_tag.find(
+                                                'span', attrs={"class": "st"}, recursive=True).text
+
+                                            row_arr.append(title)
+                                            row_arr.append(url)
+                                            row_arr.append(description)
+                                            write_arr.append(row_arr)
+
+                                            print('Title: ' + title)
+                                            print('URL: ' + url)
+                                            print('Description: ' + description)
+                                            success = True
+                                        else:
+                                            print('G tag not found')
+                                            count = count + 1
+                                            if count > 5:
+                                                success = True
+                                                row_arr.append('NO RESULTS')
+                                                row_arr.append('')
+                                                row_arr.append('')
+                                                write_arr.append(row_arr)
                                     else:
-                                        url = str(r_tag.find('a')['href'])
-                                    description = s_tag.find(
-                                        'span', attrs={"class": "st"}).text
-
-                                    row_arr.append(title)
-                                    row_arr.append(url)
-                                    row_arr.append(description)
-                                    write_arr.append(row_arr)
-
-                                    print('Title: ' + title)
-                                    print('URL: ' + url)
-                                    print('Description: ' + description)
-                                    success = True
+                                        print('sibling tag not found')
+                                        count = count + 1
+                                        if count > 5:
+                                            success = True
+                                            row_arr.append('NO RESULTS')
+                                            row_arr.append('')
+                                            row_arr.append('')
+                                            write_arr.append(row_arr)
+                                else:
+                                    print('web results tag not found')
+                                    count = count + 1
+                                    if count > 5:
+                                        success = True
+                                        row_arr.append('NO RESULTS')
+                                        row_arr.append('')
+                                        row_arr.append('')
+                                        write_arr.append(row_arr)
                             else:
                                 print('result tag not found')
+                                count = count + 1
+                                if count > 5:
+                                    success = True
+                                    row_arr.append('NO RESULTS')
+                                    row_arr.append('')
+                                    row_arr.append('')
+                                    write_arr.append(row_arr)
                         except:
                             print("Unexpected error:", sys.exc_info())
                             pass
