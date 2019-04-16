@@ -369,11 +369,22 @@
                     type: EasyLoading.TYPE['PACMAN'],
                     text: 'Please wait while we update your Google sheet!'
                 })
-                $.get("/process", function (data, status) {
-                    EasyLoading.hide({
-                    })
+                $.ajax({
+                    url: "/process",
+                    success: function (data) {
+                        EasyLoading.hide({
+                        })
+                    },
+                    error: function () {
+                        EasyLoading.hide({
+                        })
+                    },
+                    done: function () {
+                        EasyLoading.hide({
+                        })
+                    },
+                    timeout: 0
                 });
-
             });
         });
     </script>
